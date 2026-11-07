@@ -23,10 +23,12 @@ return new class extends Migration
         $driver = config("database.connections.$connection.driver");
 
         if ($driver === 'mysql') {
-            // Extend 'role' enum to include 'tamu'
-            DB::statement("ALTER TABLE users MODIFY role ENUM('super_admin','admin','user','tamu') NOT NULL DEFAULT 'user'");
-            // Extend 'role_request' enum to include 'tamu'
-            DB::statement("ALTER TABLE users MODIFY role_request ENUM('admin','user','tamu') NOT NULL DEFAULT 'user'");
+            // Pastikan semua role yang sudah ada tetap tersedia.
+            // Jangan hanya menambahkan 'tamu', karena migration ini berjalan
+            // setelah role 'kasubag' dan 'kepala_bpmp' ditambahkan.
+            DB::statement("ALTER TABLE users MODIFY role ENUM('super_admin','admin','user','kasubag','kepala_bpmp','tamu') NOT NULL DEFAULT 'user'");
+            // role_request juga harus mendukung seluruh role tersebut
+            DB::statement("ALTER TABLE users MODIFY role_request ENUM('super_admin','admin','user','kasubag','kepala_bpmp','tamu') NOT NULL DEFAULT 'user'");
         }
         // For SQLite/PostgreSQL we don't need to change anything because enum is stored as string or handled differently.
     }
@@ -41,8 +43,9 @@ return new class extends Migration
         $driver = config("database.connections.$connection.driver");
 
         if ($driver === 'mysql') {
-            DB::statement("ALTER TABLE users MODIFY role ENUM('super_admin','admin','user') NOT NULL DEFAULT 'user'");
-            DB::statement("ALTER TABLE users MODIFY role_request ENUM('admin','user') NOT NULL DEFAULT 'user'");
+            // Kembalikan enum tanpa menghilangkan role yang sudah dipakai.
+            DB::statement("ALTER TABLE users MODIFY role ENUM('super_admin','admin','user','kasubag','kepala_bpmp','tamu') NOT NULL DEFAULT 'user'");
+            DB::statement("ALTER TABLE users MODIFY role_request ENUM('super_admin','admin','user','kasubag','kepala_bpmp','tamu') NOT NULL DEFAULT 'user'");
         }
 
         Schema::table('users', function (Blueprint $table) {

@@ -362,10 +362,39 @@
                     <i class="fas fa-exchange-alt"></i>
                     <span>Laporan Mutasi</span>
                 </a>
+
                 <a href="{{ route('kepala_bpmp.laporan-rekapitulasi') }}" class="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-blue-700 rounded-lg transition-colors mb-2 {{ Request::routeIs('kepala_bpmp.laporan-rekapitulasi') ? 'bg-blue-700' : '' }}">
                     <i class="fas fa-chart-pie"></i>
                     <span>Laporan Rekapitulasi</span>
                 </a>
+                <!-- Dropdown Manajemen Pengajuan -->
+                <div class="mb-2">
+                    <button onclick="toggleDropdown('manajemenPengajuan')" class="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-blue-700 rounded-lg transition-colors {{ Request::routeIs('kepala_bpmp.peminjaman-barang*') || Request::routeIs('kepala_bpmp.permintaan-persediaan*') || Request::routeIs('kepala_bpmp.peminjaman-kendaraan*') || Request::routeIs('kepala_bpmp.peminjaman-aset*') ? 'bg-blue-700' : '' }}">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Manajemen Pengajuan</span>
+                        </div>
+                        <i class="fas fa-chevron-down transition-transform duration-200" id="manajemenPengajuan-icon"></i>
+                    </button>
+                    <div id="manajemenPengajuan-dropdown" class="ml-4 mt-1 space-y-1 hidden">
+                        <a href="{{ route('kepala_bpmp.peminjaman-barang') }}" class="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-blue-700 rounded-lg transition-colors text-sm {{ Request::routeIs('kepala_bpmp.peminjaman-barang*') ? 'bg-blue-700' : '' }}">
+                            <i class="fas fa-box"></i>
+                            <span>Peminjaman Barang</span>
+                        </a>
+                        <a href="{{ route('kepala_bpmp.permintaan-persediaan') }}" class="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-blue-700 rounded-lg transition-colors text-sm {{ Request::routeIs('kepala_bpmp.permintaan-persediaan*') ? 'bg-blue-700' : '' }}">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Permintaan Persediaan</span>
+                        </a>
+                        <a href="{{ route('kepala_bpmp.peminjaman-kendaraan') }}" class="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-blue-700 rounded-lg transition-colors text-sm {{ Request::routeIs('kepala_bpmp.peminjaman-kendaraan*') ? 'bg-blue-700' : '' }}">
+                            <i class="fas fa-car"></i>
+                            <span>Peminjaman Kendaraan</span>
+                        </a>
+                        <a href="{{ route('kepala_bpmp.peminjaman-aset') }}" class="w-full flex items-center space-x-3 px-4 py-2 text-left hover:bg-blue-700 rounded-lg transition-colors text-sm {{ Request::routeIs('kepala_bpmp.peminjaman-aset*') ? 'bg-blue-700' : '' }}">
+                            <i class="fas fa-building"></i>
+                            <span>Peminjaman Aset</span>
+                        </a>
+                    </div>
+                </div>
             @endif
         </nav>
         </div>

@@ -70,7 +70,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Tanggal Permintaan</label>
-                        <p class="mt-1 text-sm text-gray-900">{{ $request->created_at->translatedFormat('d F Y, H:i') }}</p>
+                        <p class="mt-1 text-sm text-gray-900">{{ $request->created_at ? $request->created_at->translatedFormat('d F Y, H:i') : '-' }}</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Tujuan</label>

@@ -14,20 +14,29 @@
                 <select name="vehicle_id" id="vehicleSelect" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required onchange="fillVehicleData()">
                     <option value="">-- Pilih Kendaraan --</option>
                     @foreach($kendaraan as $vehicle)
-                        <option value="{{ $vehicle->id }}" 
+                        @php($stok = (int) ($vehicle->stok ?? $vehicle->jumlah ?? 0))
+                        <option value="{{ $vehicle->id }}"
                                 data-kode-barang="{{ $vehicle->kode_barang }}"
                                 data-nama-barang="{{ $vehicle->nama_barang }}"
                                 data-kategori="{{ $vehicle->kategori }}"
                                 data-merek="{{ $vehicle->merek }}"
                                 data-nup="{{ $vehicle->nup }}"
-                                data-jumlah="{{ $vehicle->jumlah }}"
+                                data-jumlah="{{ $stok }}"
                                 data-kondisi="{{ $vehicle->kondisi }}"
                                 data-lokasi="{{ $vehicle->lokasi }}"
-                                data-nilai-perolehan="{{ $vehicle->nilai_perolehan }}">
-                            {{ $vehicle->nama_barang }} - {{ $vehicle->merek }} ({{ $vehicle->kategori }})
+                                data-nilai-perolehan="{{ $vehicle->nilai_perolehan }}"
+                                @if ($stok <= 0) disabled @endif>
+                            {{ $vehicle->nama_barang }} - {{ $vehicle->merek ?: '-' }} ({{ $vehicle->kategori ?: '-' }}) &middot;
+                            {{ $stok > 0 ? 'Stok: ' . $stok : 'Stok habis' }}
                         </option>
                     @endforeach
                 </select>
+                @if ($kendaraan->filter(fn ($vehicle) => (int) ($vehicle->stok ?? $vehicle->jumlah ?? 0) > 0)->isEmpty())
+                    <p class="mt-2 text-sm text-red-600">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        Belum ada kendaraan yang tersedia untuk dipinjam. Silakan hubungi admin.
+                    </p>
+                @endif
             </div>
             <div>
                 <label class="block text-sm font-medium mb-2">Nama Barang</label>
@@ -40,6 +49,7 @@
             <div>
                 <label class="block text-sm font-medium mb-2">Jumlah yang Diminta *</label>
                 <input type="number" name="jumlah" id="jumlah_request" placeholder="Masukkan jumlah yang diminta" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" min="1" required>
+                <p id="stok_info" class="mt-1 text-xs text-gray-500"></p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-2">Tanggal Peminjaman *</label>
@@ -108,7 +118,7 @@
                         <div class="grid grid-cols-2 gap-4 mb-3">
                             <div>
                                 <p class="text-sm text-gray-600"><strong>Jumlah:</strong> {{ $request->jumlah }} unit</p>
-                                <p class="text-sm text-gray-600"><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($request->created_at)->translatedFormat('d F Y') }}</p>
+                                <p class="text-sm text-gray-600"><strong>Tanggal:</strong> {{ $request->created_at ? \Carbon\Carbon::parse($request->created_at)->translatedFormat('d F Y') : '-' }}</p>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-600"><strong>Status:</strong> 
@@ -222,18 +232,31 @@
     function fillVehicleData() {
         const select = document.getElementById('vehicleSelect');
         const selectedOption = select.options[select.selectedIndex];
-        
+        const jumlahInput = document.getElementById('jumlah_request');
+        const stokInfo = document.getElementById('stok_info');
+
         if (selectedOption.value) {
-            document.getElementById('nama_barang_display').value = selectedOption.dataset.namaBarang;
-            document.getElementById('merek_display').value = selectedOption.dataset.merek;
-            
-            // Set max value for jumlah request
-            document.getElementById('jumlah_request').max = selectedOption.dataset.jumlah;
+            const stok = Number(selectedOption.dataset.jumlah || 0);
+
+            document.getElementById('nama_barang_display').value = selectedOption.dataset.namaBarang || '';
+            document.getElementById('merek_display').value = selectedOption.dataset.merek || '';
+
+            // Batasi jumlah permintaan sesuai stok yang tersedia
+            jumlahInput.max = stok;
+            if (Number(jumlahInput.value) > stok) {
+                jumlahInput.value = stok;
+            }
+
+            stokInfo.textContent = 'Stok tersedia: ' + stok + ' unit';
+            stokInfo.className = 'mt-1 text-xs ' + (stok > 0 ? 'text-gray-500' : 'text-red-600');
         } else {
             // Clear all fields
             document.getElementById('nama_barang_display').value = '';
             document.getElementById('merek_display').value = '';
-            document.getElementById('jumlah_request').max = '';
+            jumlahInput.max = '';
+            jumlahInput.value = '';
+            stokInfo.textContent = '';
+            stokInfo.className = 'mt-1 text-xs text-gray-500';
         }
     }
 

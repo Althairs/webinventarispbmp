@@ -31,6 +31,15 @@ Setelah menjalankan `KasubagSeeder`, akan dibuat 3 akun kasubag dengan informasi
 - **NIP**: 19640720 199203 2 001
 - **Email:** kasubag.umum@bpmp.go.id
 
+### 👤 **Kepala BPMP (dibuat oleh `UserSeeder`)**
+- **Username:** `BPMP`
+- **Password:** `password123`
+- **Nama:** Admin
+- **Instansi:** BPMP Provinsi Gorontalo
+- **Role:** `kepala_bpmp`
+- **NIP**: 09876543251
+- **Email:** bpmp@bpmp.go.id
+
 ## 🚀 Cara Menjalankan Seeder
 
 ### Untuk pertama kali atau fresh database:
@@ -40,7 +49,7 @@ php artisan migrate:fresh --seed
 
 ### Untuk menjalankan seeder saja:
 ```bash
-php artisan seed:class=KasubagSeeder
+php artisan db:seed --class=KasubagSeeder
 ```
 
 ### Untuk menjalankan semua seeder:
@@ -50,10 +59,12 @@ php artisan db:seed
 
 ## ⚠️ PENTING!
 
+- Jalankan `php artisan migrate` terlebih dahulu agar enum `role` mendukung `kasubag` dan `kepala_bpmp`
 - **Semua akun kasubag sudah aktif dan disetujui**
 - **Password default:** `kasubag123` (disarankan diganti setelah login pertama)
 - **Akun ini bisa langsung digunakan untuk login tanpa registrasi**
 - **Setiap kasubag dapat mengakses semua fitur approval**
+- Seeder aman dijalankan berulang kali (tidak menimpa akun yang sudah ada)
 
 ## 🔧 Fitur yang Dapat Diakses Kasubag:
 

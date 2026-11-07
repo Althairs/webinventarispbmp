@@ -45,11 +45,11 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
-    <div class="bg-white rounded-lg card-shadow p-6">
+<div class="grid grid-cols-1 gap-3 mb-3">
+    {{-- <div class="bg-white rounded-lg card-shadow p-6">
         <h3 class="text-lg font-bold mb-4">User Distribution</h3>
         <canvas id="userDistributionChart" width="400" height="200"></canvas>
-    </div>
+    </div> --}}
     <div class="bg-white rounded-lg card-shadow p-6">
         <h3 class="text-lg font-bold mb-4">System Information</h3>
         <div class="space-y-4">
@@ -67,7 +67,7 @@
             </div>
             <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
                 <span class="text-gray-700 font-medium">Last Backup</span>
-                <span class="text-gray-800 font-medium">2024-02-01 02:00</span>
+                <span class="text-gray-800 font-medium">2026-02-01 02:00</span>
             </div>
             <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
                 <span class="text-gray-700 font-medium">System Version</span>

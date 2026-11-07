@@ -94,7 +94,6 @@
                     src="{{ asset('storage/poster-tarif-sewa-fasilitas.jpg') }}" 
                     alt="Tarif Sewa Fasilitas BPMP Provinsi Gorontalo" 
                     class="w-full h-auto rounded-lg shadow-md object-contain"
-                    onerror="this.src='{{ asset('storage/poster-tarif-sewa-fasilitas.png') }}'; this.onerror=null;"
                     style="max-height: 800px;"
                 >
                 <p class="text-center text-sm text-gray-600 mt-3">

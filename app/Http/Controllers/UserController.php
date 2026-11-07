@@ -94,17 +94,54 @@ class UserController extends Controller
         return view('user.request_barang', compact('userRequests'));
     }
 
+    /**
+     * Query aset tetap yang boleh dipinjam melalui fitur peminjaman barang.
+     * Kendaraan dan alat angkutan bermotor dikelola melalui fitur peminjaman kendaraan.
+     */
+    private function asetTetapYangDapatDipinjam()
+    {
+        $kategoriDikecualikan = ['alat angkutan bermotor', 'kendaraan'];
+
+        return \App\Models\AsetTetap::query()
+            ->where(function ($query) use ($kategoriDikecualikan) {
+                $query->whereNull('kategori')
+                    ->orWhereRaw(
+                        'LOWER(TRIM(kategori)) NOT IN (?, ?)',
+                        $kategoriDikecualikan
+                    );
+            });
+    }
+
     // Tambahkan atau perbaiki metode ini
     public function createRequest()
     {
-        // Ambil data aset tetap dan persediaan untuk form
-        $asetTetap = \App\Models\AsetTetap::all();
+        // Data barang yang bisa dipinjam: aset tetap + persediaan tidak habis pakai
+        $products = collect();
+
+        // Data dari aset tetap (tanpa kendaraan/alat angkutan bermotor)
+        $asetTetap = $this->asetTetapYangDapatDipinjam()
+            ->orderBy('nama_barang')
+            ->get();
+
+        foreach ($asetTetap as $aset) {
+            $products->push([
+                'id' => $aset->id,
+                'kode_barang' => $aset->kode_barang,
+                'nama_barang' => $aset->nama_barang,
+                'merek' => $aset->merek,
+                'kategori' => $aset->kategori,
+                'nup' => $aset->nup,
+                'jumlah' => $aset->stok ?? $aset->jumlah ?? 0,
+                'lokasi' => $aset->lokasi,
+                'kondisi' => $aset->kondisi,
+                'type' => 'aset_tetap'
+            ]);
+        }
 
         // Hanya ambil persediaan dengan jenis TIDAK HABIS PAKAI untuk peminjaman barang
-        $persediaan = \App\Models\Persediaan::where('jenis', 'tidak_habis_pakai')->get();
-
-        // DATA persediaan
-        $products = collect();
+        $persediaan = \App\Models\Persediaan::where('jenis', 'tidak_habis_pakai')
+            ->orderBy('nama_barang')
+            ->get();
 
         // Data dari persediaan (jenis tidak habis pakai)
         foreach($persediaan as $pers) {
@@ -115,7 +152,7 @@ class UserController extends Controller
                 'merek' => $pers->merek,
                 'kategori' => $pers->kategori,
                 'nup' => null,
-                'jumlah' => $pers->jumlah,
+                'jumlah' => $pers->stok ?? $pers->jumlah ?? 0,
                 'lokasi' => null,
                 'kondisi' => null,
                 'type' => 'persediaan'
@@ -279,7 +316,8 @@ class UserController extends Controller
             $requestedAmount = $request->jumlah;
 
             if ($productType === 'aset_tetap') {
-                $product = \App\Models\AsetTetap::find($productId);
+                // Tolak juga jika aset termasuk kategori kendaraan/alat angkutan bermotor
+                $product = $this->asetTetapYangDapatDipinjam()->find($productId);
             } else {
                 // Hanya izinkan peminjaman persediaan dengan jenis TIDAK HABIS PAKAI
                 $product = \App\Models\Persediaan::where('id', $productId)
@@ -291,8 +329,13 @@ class UserController extends Controller
                 return response()->json(['message' => 'Barang tidak ditemukan atau tidak dapat dipinjam.'], 404);
             }
 
-            if ($product->jumlah < $requestedAmount) {
-                return response()->json(['message' => 'Jumlah yang diminta melebihi stok yang tersedia.'], 422);
+            // Gunakan stok tersedia (fallback ke jumlah untuk data lama)
+            $availableStock = $product->stok ?? $product->jumlah ?? 0;
+
+            if ($availableStock < $requestedAmount) {
+                return response()->json([
+                    'message' => 'Jumlah yang diminta melebihi stok yang tersedia (' . $availableStock . ' unit).'
+                ], 422);
             }
 
             RequestModel::create([
@@ -301,7 +344,8 @@ class UserController extends Controller
                 'kode_barang' => $product->kode_barang ?? 'Tidak Diketahui',
                 'kategori' => $product->kategori ?? 'Tidak Diketahui',
                 'merek' => $product->merek ?? 'Tidak Diketahui',
-                'ruangan' => $request->deskripsi_peruntukan,
+                // Kolom ruangan hanya varchar(50), jangan isi dengan deskripsi panjang.
+                'ruangan' => $request->input('ruangan') ?: '-',
                 'deskripsi_peruntukan' => $request->deskripsi_peruntukan,
                 'jumlah' => $request->jumlah,
                 'tanggal_peminjaman' => $request->tanggal_peminjaman,
@@ -451,7 +495,9 @@ class UserController extends Controller
     public function permintaanPersediaan()
     {
         // Ambil data persediaan untuk form (hanya jenis HABIS PAKAI)
-        $persediaan = \App\Models\Persediaan::where('jenis', 'habis_pakai')->get();
+        $persediaan = \App\Models\Persediaan::where('jenis', 'habis_pakai')
+            ->orderBy('nama_barang')
+            ->get();
 
         // Ambil histori permintaan persediaan untuk user yang sedang login
         $supplyRequests = PermintaanPersediaan::where('user_id', Auth::id())
@@ -486,8 +532,13 @@ class UserController extends Controller
                 return response()->json(['message' => 'Barang tidak ditemukan atau tidak dapat diminta sebagai persediaan.'], 404);
             }
 
-            if ($product->jumlah < $request->jumlah) {
-                return response()->json(['message' => 'Jumlah yang diminta melebihi stok yang tersedia.'], 422);
+            // Gunakan stok tersedia (fallback ke jumlah untuk data lama)
+            $availableStock = $product->stok ?? $product->jumlah ?? 0;
+
+            if ($availableStock < $request->jumlah) {
+                return response()->json([
+                    'message' => 'Jumlah yang diminta melebihi stok yang tersedia (' . $availableStock . ' unit).'
+                ], 422);
             }
 
             PermintaanPersediaan::create([
@@ -540,7 +591,9 @@ class UserController extends Controller
                   ->orWhere('merek', 'like', '%Toyota%')
                   ->orWhere('merek', 'like', '%Daihatsu%')
                   ->orWhere('merek', 'like', '%Mitsubishi%');
-        })->get();
+        })
+            ->orderBy('nama_barang')
+            ->get();
 
         // Ambil histori peminjaman kendaraan untuk user yang sedang login
         $vehicleRequests = PeminjamanKendaraan::where('user_id', Auth::id())
@@ -571,8 +624,13 @@ class UserController extends Controller
                 return response()->json(['message' => 'Kendaraan tidak ditemukan.'], 404);
             }
 
-            if ($vehicle->jumlah < $request->jumlah) {
-                return response()->json(['message' => 'Jumlah yang diminta melebihi stok yang tersedia.'], 422);
+            // Gunakan stok tersedia (fallback ke jumlah untuk data lama)
+            $availableStock = $vehicle->stok ?? $vehicle->jumlah ?? 0;
+
+            if ($availableStock < $request->jumlah) {
+                return response()->json([
+                    'message' => 'Jumlah yang diminta melebihi stok yang tersedia (' . $availableStock . ' unit).'
+                ], 422);
             }
 
             PeminjamanKendaraan::create([

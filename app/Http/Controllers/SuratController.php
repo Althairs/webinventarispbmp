@@ -25,8 +25,8 @@ class SuratController extends Controller
         $pathFromDb = $request->user->signature_image_path; // "signatures/signature_3_1761134229.png"
         $ttdBase64 = null;
 
-        // Gunakan disk 'public' karena file ada di storage/app/public
-        if (Storage::disk('public')->exists($pathFromDb)) {
+        // PERBAIKAN: Cek dulu apakah $pathFromDb tidak kosong
+        if (!empty($pathFromDb) && Storage::disk('public')->exists($pathFromDb)) {
             $fileContents = Storage::disk('public')->get($pathFromDb);
             $ttdBase64 = 'data:image/png;base64,' . base64_encode($fileContents);
         }
@@ -75,8 +75,8 @@ class SuratController extends Controller
         $pathFromDb = $request->user->signature_image_path; // "signatures/signature_3_1761134229.png"
         $ttdBase64 = null;
 
-        // Gunakan disk 'public' karena file ada di storage/app/public
-        if (Storage::disk('public')->exists($pathFromDb)) {
+        // PERBAIKAN: Cek dulu apakah $pathFromDb tidak kosong
+        if (!empty($pathFromDb) && Storage::disk('public')->exists($pathFromDb)) {
             $fileContents = Storage::disk('public')->get($pathFromDb);
             $ttdBase64 = 'data:image/png;base64,' . base64_encode($fileContents);
         }
@@ -121,8 +121,8 @@ class SuratController extends Controller
         $pathFromDb = $request->user->signature_image_path; // "signatures/signature_3_1761134229.png"
         $ttdBase64 = null;
 
-        // Gunakan disk 'public' karena file ada di storage/app/public
-        if (Storage::disk('public')->exists($pathFromDb)) {
+        // PERBAIKAN: Cek dulu apakah $pathFromDb tidak kosong
+        if (!empty($pathFromDb) && Storage::disk('public')->exists($pathFromDb)) {
             $fileContents = Storage::disk('public')->get($pathFromDb);
             $ttdBase64 = 'data:image/png;base64,' . base64_encode($fileContents);
         }
@@ -214,8 +214,8 @@ class SuratController extends Controller
         $pathFromDb = $request->user->signature_image_path; // "signatures/signature_3_1761134229.png"
         $ttdBase64 = null;
 
-        // Gunakan disk 'public' karena file ada di storage/app/public
-        if (Storage::disk('public')->exists($pathFromDb)) {
+        // PERBAIKAN: Cek dulu apakah $pathFromDb tidak kosong
+        if (!empty($pathFromDb) && Storage::disk('public')->exists($pathFromDb)) {
             $fileContents = Storage::disk('public')->get($pathFromDb);
             $ttdBase64 = 'data:image/png;base64,' . base64_encode($fileContents);
         }
@@ -250,8 +250,8 @@ class SuratController extends Controller
         $pathFromDb = $request->user->signature_image_path; // "signatures/signature_3_1761134229.png"
         $ttdBase64 = null;
 
-        // Gunakan disk 'public' karena file ada di storage/app/public
-        if (Storage::disk('public')->exists($pathFromDb)) {
+        // PERBAIKAN: Cek dulu apakah $pathFromDb tidak kosong
+        if (!empty($pathFromDb) && Storage::disk('public')->exists($pathFromDb)) {
             $fileContents = Storage::disk('public')->get($pathFromDb);
             $ttdBase64 = 'data:image/png;base64,' . base64_encode($fileContents);
         }
@@ -285,8 +285,8 @@ class SuratController extends Controller
         $pathFromDb = $request->user->signature_image_path; // "signatures/signature_3_1761134229.png"
         $ttdBase64 = null;
 
-        // Gunakan disk 'public' karena file ada di storage/app/public
-        if (Storage::disk('public')->exists($pathFromDb)) {
+        // PERBAIKAN: Cek dulu apakah $pathFromDb tidak kosong
+        if (!empty($pathFromDb) && Storage::disk('public')->exists($pathFromDb)) {
             $fileContents = Storage::disk('public')->get($pathFromDb);
             $ttdBase64 = 'data:image/png;base64,' . base64_encode($fileContents);
         }
@@ -344,4 +344,3 @@ class SuratController extends Controller
         return view('surat.peminjaman_aset_new', $data);
     }
 }
-

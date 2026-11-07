@@ -16,21 +16,38 @@
                 <label class="block text-sm font-medium mb-2">Pilih Barang *</label>
                 <select name="product_id" id="productSelect" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required onchange="fillProductData()">
                     <option value="">-- Pilih Barang --</option>
-                    @foreach($products as $product)
-                        <option value="{{ $product['id']}}"
-                                data-kode-barang="{{ $product['kode_barang'] }}"
-                                data-nama-barang="{{ $product['nama_barang'] }}"
-                                data-merek="{{ $product['merek'] }}"
-                                data-kategori="{{ $product['kategori'] }}"
-                                data-nup="{{ $product['nup'] }}"
-                                data-jumlah="{{ $product['jumlah'] }}"
-                                data-lokasi="{{ $product['lokasi'] }}"
-                                data-kondisi="{{ $product['kondisi'] }}"
-                                data-type="{{ $product['type'] }}">
-                            {{ $product['nama_barang'] }} - {{ $product['merek'] }} ({{ $product['kategori'] }})
-                        </option>
+                    @foreach ([
+                        'Aset Tetap' => $products->where('type', 'aset_tetap'),
+                        // 'Persediaan Tidak Habis Pakai' => $products->where('type', 'persediaan'),
+                    ] as $groupLabel => $groupProducts)
+                        @if ($groupProducts->isNotEmpty())
+                            <optgroup label="{{ $groupLabel }}">
+                                @foreach ($groupProducts as $product)
+                                    <option value="{{ $product['id'] }}"
+                                            data-kode-barang="{{ $product['kode_barang'] }}"
+                                            data-nama-barang="{{ $product['nama_barang'] }}"
+                                            data-merek="{{ $product['merek'] }}"
+                                            data-kategori="{{ $product['kategori'] }}"
+                                            data-nup="{{ $product['nup'] }}"
+                                            data-jumlah="{{ $product['jumlah'] }}"
+                                            data-lokasi="{{ $product['lokasi'] }}"
+                                            data-kondisi="{{ $product['kondisi'] }}"
+                                            data-type="{{ $product['type'] }}"
+                                            @if ((int) $product['jumlah'] <= 0) disabled @endif>
+                                        {{ $product['nama_barang'] }} - {{ $product['merek'] ?: '-' }} ({{ $product['kategori'] ?: '-' }}) &middot;
+                                        {{ (int) $product['jumlah'] > 0 ? 'Stok: ' . $product['jumlah'] : 'Stok habis' }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                        @endif
                     @endforeach
                 </select>
+                @if ($products->filter(fn ($product) => (int) $product['jumlah'] > 0)->isEmpty())
+                    <p class="mt-2 text-sm text-red-600">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        Belum ada barang yang tersedia untuk dipinjam. Silakan hubungi admin.
+                    </p>
+                @endif
             </div>
             <div>
                 <label class="block text-sm font-medium mb-2">Nama Barang</label>
@@ -43,6 +60,7 @@
             <div>
                 <label class="block text-sm font-medium mb-2">Jumlah yang Diminta *</label>
                 <input type="number" name="jumlah" id="jumlah_request" placeholder="Masukkan jumlah yang diminta" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" min="1" required>
+                <p id="stok_info" class="mt-1 text-xs text-gray-500"></p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-2">Tanggal Peminjaman *</label>
@@ -114,7 +132,7 @@
                             </div>
                             <div>
                                 {{-- PERBAIKAN: Menggunakan Carbon untuk memformat tanggal --}}
-                                <p class="text-sm text-gray-600"><strong>Tanggal:</strong> {{ $req->request_date->translatedFormat('d F Y') }}</p>
+                                <p class="text-sm text-gray-600"><strong>Tanggal:</strong> {{ $req->request_date ? $req->request_date->translatedFormat('d F Y') : '-' }}</p>
                                 <p class="text-sm text-gray-600"><strong>Status:</strong>
                                     @if ($req->status === 'approved') Diterima Admin
                                     @elseif ($req->status === 'rejected') Ditolak Admin
@@ -159,18 +177,31 @@
     function fillProductData() {
         const select = document.getElementById('productSelect');
         const selectedOption = select.options[select.selectedIndex];
+        const jumlahInput = document.getElementById('jumlah_request');
+        const stokInfo = document.getElementById('stok_info');
 
         if (selectedOption.value) {
-            document.getElementById('nama_barang_display').value = selectedOption.dataset.namaBarang;
-            document.getElementById('merek_display').value = selectedOption.dataset.merek;
+            const stok = Number(selectedOption.dataset.jumlah || 0);
 
-            // Set max value for jumlah request
-            document.getElementById('jumlah_request').max = selectedOption.dataset.jumlah;
+            document.getElementById('nama_barang_display').value = selectedOption.dataset.namaBarang || '';
+            document.getElementById('merek_display').value = selectedOption.dataset.merek || '';
+
+            // Batasi jumlah permintaan sesuai stok yang tersedia
+            jumlahInput.max = stok;
+            if (Number(jumlahInput.value) > stok) {
+                jumlahInput.value = stok;
+            }
+
+            stokInfo.textContent = 'Stok tersedia: ' + stok + ' unit';
+            stokInfo.className = 'mt-1 text-xs ' + (stok > 0 ? 'text-gray-500' : 'text-red-600');
         } else {
             // Clear all fields
             document.getElementById('nama_barang_display').value = '';
             document.getElementById('merek_display').value = '';
-            document.getElementById('jumlah_request').max = '';
+            jumlahInput.max = '';
+            jumlahInput.value = '';
+            stokInfo.textContent = '';
+            stokInfo.className = 'mt-1 text-xs text-gray-500';
         }
     }
 

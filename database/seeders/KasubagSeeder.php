@@ -2,20 +2,25 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Database\Seeders\Concerns\SeedsDefaultUsers;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 class KasubagSeeder extends Seeder
 {
+    use SeedsDefaultUsers;
+
     /**
      * Run the database seeds.
+     *
+     * Seeder ini idempotent dan tidak menimpa akun yang sudah ada.
      */
     public function run(): void
     {
-        DB::table('users')->insert([
+        $now = Carbon::now();
+
+        $kasubags = [
             [
                 'nama_lengkap' => 'Dr. Hj. Fatimah S.Pd, M.Pd',
                 'instansi' => 'BPMP Provinsi Gorontalo',
@@ -26,9 +31,10 @@ class KasubagSeeder extends Seeder
                 'role' => 'kasubag',
                 'status' => 'active',
                 'is_suspend' => false,
+                'role_request' => 'kasubag',
                 'is_approved_by_admin' => true,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
                 'nama_lengkap' => 'Bambang Sutrisno, S.Sos, M.Pd',
@@ -40,9 +46,10 @@ class KasubagSeeder extends Seeder
                 'role' => 'kasubag',
                 'status' => 'active',
                 'is_suspend' => false,
+                'role_request' => 'kasubag',
                 'is_approved_by_admin' => true,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
                 'nama_lengkap' => 'Dra. Sri Wahyuni, M.A.P',
@@ -54,10 +61,15 @@ class KasubagSeeder extends Seeder
                 'role' => 'kasubag',
                 'status' => 'active',
                 'is_suspend' => false,
+                'role_request' => 'kasubag',
                 'is_approved_by_admin' => true,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ]
-        ]);
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ];
+
+        foreach ($kasubags as $kasubag) {
+            $this->seedUserIfMissing($kasubag);
+        }
     }
 }

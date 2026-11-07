@@ -324,6 +324,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/laporan-transaksi-keluar', [KepalaBpmpController::class, 'laporanTransaksiKeluar'])->name('laporan-transaksi-keluar');
         Route::get('/laporan-mutasi', [KepalaBpmpController::class, 'laporanMutasi'])->name('laporan-mutasi');
         Route::get('/laporan-rekapitulasi', [KepalaBpmpController::class, 'laporanRekapitulasi'])->name('laporan-rekapitulasi');
+
+        Route::get('/peminjaman-barang', [KepalaBpmpController::class, 'peminjamanBarang'])->name('peminjaman-barang');
+        Route::get('/peminjaman-barang/{id}/detail', [KepalaBpmpController::class, 'getDetailPeminjamanBarang'])->name('peminjaman-barang.detail');
+        Route::get('/permintaan-persediaan', [KepalaBpmpController::class, 'permintaanPersediaan'])->name('permintaan-persediaan');
+        Route::get('/permintaan-persediaan/{id}/detail', [KepalaBpmpController::class, 'getDetailPermintaanPersediaan'])->name('permintaan-persediaan.detail');
+        Route::get('/peminjaman-kendaraan', [KepalaBpmpController::class, 'peminjamanKendaraan'])->name('peminjaman-kendaraan');
+        Route::get('/peminjaman-kendaraan/{id}/detail', [KepalaBpmpController::class, 'getDetailPeminjamanKendaraan'])->name('peminjaman-kendaraan.detail');
+        Route::get('/peminjaman-aset', [KepalaBpmpController::class, 'peminjamanAset'])->name('peminjaman-aset');
+        Route::get('/peminjaman-aset/{id}/detail', [KepalaBpmpController::class, 'getDetailPeminjamanAset'])->name('peminjaman-aset.detail');
     });
 
     // Group untuk Super Admin

@@ -94,7 +94,7 @@
                             <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="kasubag" {{ old('role') == 'kasubag' ? 'selected' : '' }}>Kasubag</option>
                             <option value="kepala_bpmp" {{ old('role') == 'kepala_bpmp' ? 'selected' : '' }}>Kepala BPMP</option>
-                            <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
+                            <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Pegawai</option>
                             <option value="tamu" {{ old('role') == 'tamu' ? 'selected' : '' }}>Tamu</option>
                         </select>
                         @error('role')
